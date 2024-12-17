@@ -170,4 +170,4 @@ cython_debug/
 #.idea/
 
 # custom
-data/
+data/*.csv

@@ -1,0 +1,30 @@
+{
+    "SKILL-PHRASES": [
+        "computer", "science", "engineering", "software", "hardware",
+        "programming", "development", "architecture", "infrastructure",
+        "database", "network", "system", "analytics", "intelligence",
+        "security", "automation", "cloud", "design", "analysis",
+        
+        "management", "leadership", "strategy", "operations", "planning",
+        "optimization", "coordination", "administration", "procurement",
+        "marketing", "sales", "finance", "accounting", "budget",
+        
+        "design", "content", "media", "production", "photography",
+        "animation", "illustration", "typography", "layout",
+        
+        "research", "analysis", "statistics", "modeling", "visualization",
+        "mining", "processing", "collection", "interpretation",
+        
+        "manufacturing", "healthcare", "education", "retail", "logistics",
+        "construction", "agriculture", "biotechnology", "pharmaceutical",
+        
+        "methodology", "framework", "process", "workflow", "protocol",
+        "standard", "procedure", "technique", "approach",
+        
+        "communication", "collaboration", "presentation", "facilitation",
+        "negotiation", "consultation", "coordination", "mentorship",
+        
+        "platform", "application", "tool", "solution", "environment",
+        "interface", "framework", "language", "protocol"
+    ]
+}
