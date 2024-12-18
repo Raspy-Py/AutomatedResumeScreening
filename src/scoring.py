@@ -6,9 +6,15 @@ from collections import defaultdict
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from mistralai import Mistral
+from dotenv import dotenv_values
+import re
+
+env_vars = dotenv_values(".env")
+mistral_api_key = env_vars("MISTRAL_API_KEY")
 
 
-class EntityExtractor:
+class SpaCyEntityExtractor:
     def __init__(self):
         self.nlp = spacy.load("en_core_web_lg")
         self.ruler = self.nlp.add_pipe("entity_ruler", before="ner")
@@ -58,6 +64,43 @@ class EntityExtractor:
                                 for tech in phrase_list)]
 
         return dict(entities) | doc_phrases
+        
+class LLMEntityExtractor:
+    def __init__(self):
+        self.model = "mistral-large-latest"
+        self.client = Mistral(mistral_api_key)
+
+    def llm_resume_parser(self, text):
+        chat_response = self.client.chat.complete(
+            model= self.model,
+            messages = [
+                {
+                    "role": "system",
+                    "content": "You are resume analyzer with a single role of extracting most important skills. Your output ALWAYS is following format: degree: ba OR mba OR phd OR master OR ms OR bachelor OR bs OR associate OR diploma OR certificate OR certification OR undergraduate , experience: phrases describing previous experience, skills: comma separated skills. If you failed finding any of these, please return NULL",
+                },
+                {
+                    "role": "user",
+                    "content": text
+                }
+            ]
+        )
+        
+        return chat_response.choices[0].message.content
+
+    def extract(self, text):
+        parsed_text = self.llm_resume_parser(text)
+        
+        degree = re.search(r"degree: ([a-z\s]+)", parsed_text).group(1)
+        skills = re.search(r"skills: ([a-z\s,]+)", parsed_text).group(1)
+        experience = re.search(r"experience: ([a-z\s,]+)", parsed_text).group(1)
+
+        data_science_resume_dict = {
+            "DEGREE": [degree],
+            "SKILL": [skills],
+            "EXPERIENCE": [experience]
+        }
+        
+        return data_science_resume_dict
         
 
 class EmbeddingModel:
@@ -153,4 +196,3 @@ class ResumeScorer:
         _scores = cosine_similarity(job_embedds, resume_embedds)
         max_scores = _scores.max(axis=1)
         return max_scores.sum()
-    
