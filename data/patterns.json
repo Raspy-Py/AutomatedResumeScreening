@@ -86,7 +86,11 @@
         "fortran",
         "erlang",
         "elixir",
-        "clojure"
+        "clojure",
+
+        "yolo", "yolov5", "opencv", "linux", "arm64", "onnx", "ncnn", "tensorflow", "openvino", "tensorrt",
+        "pytorch", "npu", "cuda", "cudnn", "dnn", "dlib", "darknet", "caffe", "mxnet", "keras", "torch", 
+        "caffe2", "paddle", "tflite", "mnn", "rknn", "nnie", "nnir"
     ],
 
     "DEGREE": [
