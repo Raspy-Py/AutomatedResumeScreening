@@ -1,12 +1,7 @@
 import re
-import json
-import spacy
-import unicodedata
-import pandas as pd
-from collections import defaultdict
-
 import PyPDF2
 import pdfplumber
+import unicodedata
 
 
 class PDFReader:
@@ -81,56 +76,4 @@ class TextPreprocessor:
         text = ' '.join(text.split())
         
         return text
-
-
-class EntityExtractor:
-    def __init__(self):
-        self.nlp = spacy.load("en_core_web_lg")
-        self.ruler = self.nlp.add_pipe("entity_ruler", before="ner")
-        self.entity_labels = []
-        self.phrases = {}
-
-
-    def load_patterns(self, patters_file: str = None):
-        with open(patters_file) as f:
-            patters_json = json.load(f)
-            
-        self.patterns = [
-            {"label": entity_label, "pattern": [{"LOWER": {"IN": entities}}]} for entity_label, entities in patters_json.items()    
-        ]
-        self.entity_labels = list(patters_json.keys())
-
-        self.ruler.add_patterns(self.patterns)
-
-    def load_phrases(self, phrases_file: str = None):
-        with open(phrases_file) as f:
-            self.phrases = json.load(f)
-
-
-    def extract(self, text):
-        if pd.isna(text):
-            return {}
-            
-        doc = self.nlp(text)
-        
-        entities = defaultdict(list)
-        
-        # Standard named entities
-        for ent in doc.ents:
-            if ent.label_ in ['LAUGUAGE']:
-                entities[ent.label_].append(ent.text)
-        
-        # Custom entities
-        for ent in doc.ents:
-            if ent.label_ in self.entity_labels:
-                entities[ent.label_].append(ent.text)
-        
-        # Noun chunks
-        doc_phrases = {}
-        for phrase_label, phrase_list in self.phrases.items():
-            doc_phrases[phrase_label] = [chunk.text for chunk in doc.noun_chunks 
-                            if any(tech in chunk.text.lower() 
-                                for tech in phrase_list)]
-
-        return dict(entities) | doc_phrases
-        
+    
