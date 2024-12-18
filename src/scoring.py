@@ -68,7 +68,7 @@ class SpaCyEntityExtractor:
 class LLMEntityExtractor:
     def __init__(self):
         self.model = "mistral-large-latest"
-        self.client = Mistral(mistral_api_key)
+        self.client = Mistral('JnaRE4F25Lq2cJLoVUmjPwjp9COhgY19')
 
     def llm_resume_parser(self, text):
         chat_response = self.client.chat.complete(
@@ -76,7 +76,7 @@ class LLMEntityExtractor:
             messages = [
                 {
                     "role": "system",
-                    "content": "You are resume analyzer with a single role of extracting most important skills. Your output ALWAYS is following format: degree: ba OR mba OR phd OR master OR ms OR bachelor OR bs OR associate OR diploma OR certificate OR certification OR undergraduate , experience: phrases describing previous experience, skills: comma separated skills. If you failed finding any of these, please return NULL",
+                    "content": "You are resume analyzer with a single role of extracting most important skills. Your output ALWAYS is following format: degree: ba OR mba OR phd OR master OR ms OR bachelor OR bs OR associate OR diploma OR certificate OR certification OR undergraduate , experience: phrases describing previous experience, skills: comma separated skills. If you failed finding any of these, please return null",
                 },
                 {
                     "role": "user",
@@ -89,18 +89,53 @@ class LLMEntityExtractor:
 
     def extract(self, text):
         parsed_text = self.llm_resume_parser(text)
+    
+        normalized_text = self.normalize(parsed_text)
         
-        degree = re.search(r"degree: ([a-z\s]+)", parsed_text).group(1)
-        skills = re.search(r"skills: ([a-z\s,]+)", parsed_text).group(1)
-        experience = re.search(r"experience: ([a-z\s,]+)", parsed_text).group(1)
+        degree = re.search(r"degree: ([a-z\s]+)", normalized_text).group(1)
+        
+        if degree == "null":
+            degree = ''
+        
+        
+        skills = re.search(r"skills: ([a-z\s,]+)", normalized_text).group(1)
+        
+        if skills == "null":
+            skills = ''
+        
+        experience = re.search(r"experience: ([a-z\s,]+)", normalized_text).group(1)
+        
+        if experience == "null":
+            experience = ''
 
         data_science_resume_dict = {
-            "DEGREE": [degree],
-            "SKILL": [skills],
-            "EXPERIENCE": [experience]
+            "DEGREE": degree.split(', '),
+            "SKILL": skills.split(', '),
+            "EXPERIENCE": experience.split(', ')
         }
         
         return data_science_resume_dict
+    
+    def normalize(self, text: str) -> str:
+        # Convert to lowercase
+        text = text.lower()
+        
+        # Handle unicode characters
+        text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
+        
+        # Remove URLs
+        text = re.sub(r'http\S+|www.\S+', '', text)
+        
+        # Remove email addresses
+        text = re.sub(r'\S+@\S+', '', text)
+        
+        # Remove phone numbers
+        text = re.sub(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', '', text)
+        
+        # Remove extra whitespace
+        text = ' '.join(text.split())
+        
+        return text
         
 
 class EmbeddingModel:
